@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.VictorSP;
@@ -14,6 +16,8 @@ public class Robot extends TimedRobot {
   SpeedControllerGroup left, right;
   DifferentialDrive drive;
   XboxController joystick;
+  SpeedControllerGroup shooter;
+  AHRS navX;
 
   @Override
   public void robotInit() {
@@ -26,6 +30,8 @@ public class Robot extends TimedRobot {
     right = new SpeedControllerGroup(motorRight, motorRight2);
 
     drive = new DifferentialDrive(left, right);
+
+    navX = new AHRS(SPI.Port.kMXP);
   }
 
   @Override
@@ -38,6 +44,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
+    if (navX.getAngle() < 45)
+      drive.arcadeDrive(0, 0.4);
+    else
+      drive.stopMotor();
   }
 
   @Override
@@ -48,6 +58,12 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     drive.arcadeDrive(joystick.getY(Hand.kLeft), joystick.getX(Hand.kRight));
+    if (joystick.getAButton())
+      shooter.set(0.8);
+    else if (joystick.getBButton())
+      shooter.set(-0.8);
+    else
+      shooter.set(0);
   }
 
   @Override
